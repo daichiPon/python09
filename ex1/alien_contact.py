@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, ValueError, model_validator
+from pydantic import BaseModel, Field, ValidationError, model_validator
 import datetime
 from enum import Enum
 
@@ -27,7 +27,8 @@ class AlienContact(BaseModel):
             raise ValueError("Contact ID must start with 'AC'")
         if self.contact_type == ContactType.PHYSICAL and not self.is_verified:
             raise ValueError("Physical contact reports must be verified")
-        if self.contact_type == ContactType.TELEPATHIC and self.witness_count < 3:
+        if (self.contact_type == ContactType.TELEPATHIC
+                and self.witness_count < 3):
             raise ValueError("Telepathic contact requires at least 3 witnesses")
         if self.signal_strength > 7.0 and self.message_received is None:
             raise ValueError("Strong signals should include received messages")
@@ -37,3 +38,35 @@ class AlienContact(BaseModel):
 if __name__ == "__main__":
     print("Alien Contact Log Validation")
     print("======================================")
+    alienContact = AlienContact(
+        contact_id="AC_2024_001",
+        timestamp="2024-12-03",
+        location=" Area 51, Nevada",
+        contact_type="radio",
+        signal_strength=8.5,
+        duration_minutes=45,
+        witness_count=5,
+        message_received='Greetings from Zeta Reticuli',
+    )
+    print(f"ID: {alienContact.contact_id}")
+    print(f"Type: {alienContact.contact_type}")
+    print(f"Location:{alienContact.location}")
+    print(f"signal: {alienContact.signal_strength}/10")
+    print(f"Duration: {alienContact.duration_minutes} minites")
+    print(f"Witnesses: {alienContact.witness_count}")
+    print(f"Message: {alienContact.message_received}")
+    print("\n======================================")
+    try:
+        alienContact = AlienContact(
+            contact_id="AC_2024_001",
+            timestamp="2024-12-03",
+            location=" Area 51, Nevada",
+            contact_type="telepathic",
+            signal_strength=8.5,
+            duration_minutes=45,
+            witness_count=2,
+            message_received='Greetings from Zeta Reticuli',
+        )
+    except (ValueError, ValidationError) as e:
+        print("Expected validation error:")
+        print(e)
