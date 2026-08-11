@@ -3,10 +3,10 @@ from enum import Enum
 import datetime
 
 
-class CrewRanc(str, Enum):
-    CANDET = "cadet"
+class Rank(str, Enum):
+    CADET = "cadet"
     OFFICER = "officer"
-    LINEUTENANT = "lieutenant"
+    LIEUTENANT = "lieutenant"
     CAPTAIN = "captain"
     COMMANDER = "commander"
 
@@ -14,7 +14,7 @@ class CrewRanc(str, Enum):
 class CrewMember(BaseModel):
     member_id: str = Field(min_length=3, max_length=10)
     name: str = Field(min_length=2, max_length=50)
-    rank: CrewRanc
+    rank: Rank
     age: int = Field(ge=18, le=80)
     specialization: str = Field(min_length=3, max_length=30)
     years_experience: int = Field(ge=0, le=50)
@@ -32,12 +32,12 @@ class SpaceMission(BaseModel):
     budget_millions: float = Field(ge=1.0, le=10000.0)
 
     @model_validator(mode='after')
-    def check_rule(self):
+    def check_rule(self) -> None:
         people = 0
         if not self.mission_id.startswith("M"):
             raise ValueError("Mission ID must start with M")
-        if not any(crewMember.rank == CrewRanc.COMMANDER
-                   or crewMember.rank == CrewRanc.CAPTAIN
+        if not any(crewMember.rank == Rank.COMMANDER
+                   or crewMember.rank == Rank.CAPTAIN
                    for crewMember in self.crew):
             raise ValueError(
                 "Mission must have at least one Commander or Captain")
@@ -48,10 +48,9 @@ class SpaceMission(BaseModel):
                 people += 1
         if self.duration_days > 365 and people < len(self.crew) / 2:
             raise ValueError("Long missions need 50% experienced crew")
-        return self
 
 
-if __name__ == "__main__":
+def main() -> None:
     print("Space Mission Crew Validation")
     print("=========================================")
     print("Valid mission created:")
@@ -63,15 +62,15 @@ if __name__ == "__main__":
         duration_days=900,
         crew=[
             CrewMember(member_id="CM001", name="Sarah Connor",
-                       rank=CrewRanc.COMMANDER, age=42,
+                       rank=Rank.COMMANDER, age=42,
                        specialization="Mission Command",
                        years_experience=15),
             CrewMember(member_id="CM002", name="John Smith",
-                       rank=CrewRanc.LINEUTENANT, age=35,
+                       rank=Rank.LIEUTENANT, age=35,
                        specialization="Navigation",
                        years_experience=8),
             CrewMember(member_id="CM003", name="Alice Johnson",
-                       rank=CrewRanc.OFFICER, age=29,
+                       rank=Rank.OFFICER, age=29,
                        specialization="Engineering",
                        years_experience=6),
         ],
@@ -100,7 +99,7 @@ if __name__ == "__main__":
             duration_days=30,
             crew=[
                 CrewMember(member_id="CM010", name="Bob Miles",
-                           rank=CrewRanc.OFFICER, age=30,
+                           rank=Rank.OFFICER, age=30,
                            specialization="Geology",
                            years_experience=4),
             ],
@@ -108,3 +107,7 @@ if __name__ == "__main__":
         )
     except ValidationError as e:
         print(e.errors()[0]["msg"].removeprefix("Value error, "))
+
+
+if __name__ == "__main__":
+    main()
