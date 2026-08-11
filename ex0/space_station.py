@@ -13,9 +13,10 @@ class SpaceStation(BaseModel):
     notes: str | None = Field(default=None, max_length=200)
 
 
-if __name__ == "__main__":
+def main() -> None:
     print("Space Station Data Validation")
     print("========================================")
+    print("Valid station created:")
     try:
         spaceStation = SpaceStation(
             station_id="ISS001",
@@ -23,25 +24,32 @@ if __name__ == "__main__":
             crew_size=6,
             power_level=85.5,
             oxygen_level=92.3,
-            last_maintenance="2026-08-08T10:00:00" 
+            last_maintenance=datetime.datetime(2026, 8, 8, 10, 0, 0)
         )
         print(f"ID: {spaceStation.station_id}")
         print(f"Name: {spaceStation.name}")
         print(f"Crew: {spaceStation.crew_size} people")
-        print(f"Power: {spaceStation.power_level} %")
-        print(f"Oxygen: {spaceStation.oxygen_level} %")
-        print(f"Status: {spaceStation.is_operational}")
+        print(f"Power: {spaceStation.power_level}%")
+        print(f"Oxygen: {spaceStation.oxygen_level}%")
+        status = ("Operational" if spaceStation.is_operational
+                  else "Not operational")
+        print(f"Status: {status}")
     except ValidationError as e:
         print(e)
     print("========================================")
+    print("Expected validation error:")
     try:
         spaceStation = SpaceStation(
-            station_id="ISS001aaaaaaaaaaa",
+            station_id="ISS001",
             name="International Space Station",
-            crew_size=6,
+            crew_size=25,
             power_level=85.5,
             oxygen_level=92.3,
-            last_maintenance=datetime.date(2026, 8, 8)
+            last_maintenance=datetime.datetime(2026, 8, 8)
         )
     except ValidationError as e:
-        print(e)
+        print(e.errors()[0]["msg"])
+
+
+if __name__ == "__main__":
+    main()

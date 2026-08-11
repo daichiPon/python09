@@ -32,7 +32,7 @@ class SpaceMission(BaseModel):
     budget_millions: float = Field(ge=1.0, le=10000.0)
 
     @model_validator(mode='after')
-    def check_rule(self) -> None:
+    def check_rule(self) -> "SpaceMission":
         people = 0
         if not self.mission_id.startswith("M"):
             raise ValueError("Mission ID must start with M")
@@ -48,6 +48,7 @@ class SpaceMission(BaseModel):
                 people += 1
         if self.duration_days > 365 and people < len(self.crew) / 2:
             raise ValueError("Long missions need 50% experienced crew")
+        return self
 
 
 def main() -> None:
